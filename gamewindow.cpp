@@ -19,23 +19,37 @@ using namespace std;
 
 GameWindow::GameWindow()
 {
+    camera = new Camera();
+}
+
+GameWindow::GameWindow(Camera *camera, float framerate, int type)
+{
+    this->camera = camera;
+    this->framerate = framerate;
+
+    if(type == 0) {
+        cthread = new ClientThread();
+        sthread = nullptr;
+        connect(cthread, SIGNAL(seasonChangeSignal()), this, SLOT(onSeasonChange()));
+    } else {
+        sthread = new ServerThread();
+//        sthread->start();
+    }
 }
 
 void GameWindow::initialize()
 {
-    const qreal retinaScale = devicePixelRatio();
 
+    timer.setInterval(framerate * 1000);
+    this->camera->initialize(devicePixelRatio(), width(), height(), -100.0, 100.0);
+    timer.start();
+    this->connect(&timer, SIGNAL(timeout()), this, SLOT(renderNow()));
 
-    glViewport(0, 0, width() * retinaScale, height() * retinaScale);
+    if(sthread != nullptr) {
+        sthread->onSeasonChangeRequest();
+    }
 
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -100.0, 100.0);
-
-
-    loadMap(":/heightmap-1.png");
-
+    loadMap(":/heightmap-2.png");
 }
 
 void GameWindow::loadMap(QString localPath)
@@ -65,16 +79,29 @@ void GameWindow::loadMap(QString localPath)
     }
 }
 
+void GameWindow::onSeasonChange()
+{
+    //TODO changer la saison
+    qDebug() << "on season change";
+}
+
 void GameWindow::render()
 {
+//    this->elapsed = timer.elapsed();
 
+//    if(this->elapsed > this->framerate) {
+//        this->render(this->elapsed);
+//        this->elapsed = 0;
+//        timer.start();
+//    }
+    this->render(0);
+}
+
+void GameWindow::render(float delta)
+{
     glClear(GL_COLOR_BUFFER_BIT);
-
-
-    glLoadIdentity();
-   glScalef(ss,ss,ss);
-    glRotatef(rotX,1.0f,0.0f,0.0f);
-    glRotatef(rotY,0.0f,0.0f,1.0f);
+    this->camera->update(delta);
+//    this->camera->rotate(1, 0, 0);
 
     switch(etat)
     {
@@ -124,28 +151,47 @@ void GameWindow::keyPressEvent(QKeyEvent *event)
 {
     switch(event->key())
     {
+    case Qt::Key_Escape:
+        qApp->exit();
+        break;
     case 'Z':
-        ss += 0.10f;
+        camera->scale(0.10f, 0.10f, 0);
         break;
     case 'S':
-        ss -= 0.10f;
+        camera->scale(-0.10f, -0.10f, 0);
         break;
     case 'A':
-        rotX += 1.0f;
+        camera->rotate(1.0f, 0, 0);
         break;
     case 'E':
-        rotX -= 1.0f;
+        camera->rotate(-1.0f, 0, 0);
         break;
     case 'Q':
-        rotY += 1.0f;
+        camera->rotate(0, 1.0f, 0);
         break;
     case 'D':
-        rotY -= 1.0f;
+        camera->rotate(0, -1.0f, 0);
         break;
     case 'W':
         etat ++;
         if(etat > 5)
             etat = 0;
+        break;
+    case 'C':
+        this->camera->setAnimated(!this->camera->isAnimated());
+        break;
+    case 'P':
+        qDebug() << framerate;
+
+        this->framerate *= 2;
+        timer.stop();
+        timer.start(framerate * 1000);
+        break;
+    case 'M':
+        this->framerate /= 2;
+        if(this->framerate < 0.001) this->framerate = 0.001;
+        timer.stop();
+        timer.start(framerate * 1000);
         break;
     case 'X':
         carte ++;
