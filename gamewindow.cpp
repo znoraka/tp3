@@ -36,7 +36,7 @@ void GameWindow::initialize()
 {
 
     timer.setInterval(framerate * 1000);
-    this->camera->initialize(devicePixelRatio(), width(), height(), -100.0, 100.0);
+    this->camera->initialize(devicePixelRatio(), width(), height(), 0, 100.0);
     timer.start();
     this->connect(&timer, SIGNAL(timeout()), this, SLOT(renderNow()));
 
@@ -51,6 +51,7 @@ void GameWindow::initialize()
 
     glEnable(GL_CULL_FACE);
 
+    snow = new SnowParticles(1000, 1000, &this->m_image);
     //    loadMap(":/heightmap-2.png");
 }
 
@@ -65,7 +66,7 @@ void GameWindow::onSeasonChange()
 
 void GameWindow::render()
 {
-    this->render(0);
+    this->render((float) timer.interval() * 0.001f);
 }
 
 void GameWindow::render(float delta)
@@ -76,6 +77,8 @@ void GameWindow::render(float delta)
     this->camera->update(delta);
 
     drawTriangles();
+    snow->update(delta);
+    snow->draw(delta);
     ++m_frame;
 }
 
@@ -186,6 +189,7 @@ void GameWindow::drawTriangles()
             glColor3f(0.9, 0.8, 0.9);
         }
         glVertex3f(vertices[var], vertices[var + 1], vertices[var + 2]);
+//        std::cout << vertices[var] << ", " << vertices[var+1] << ", " << vertices[var+2] <<std::endl << "******" << std::endl;
     }
     glEnd();
 }

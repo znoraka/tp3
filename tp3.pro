@@ -3,12 +3,16 @@ SOURCES += $$PWD/openglwindow.cpp \
     gamewindow.cpp \
     camera.cpp \
     clientthread.cpp \
-    serverthread.cpp
+    serverthread.cpp \
+    snowparticles.cpp \
+    pool.cpp
 HEADERS += $$PWD/openglwindow.h \
     gamewindow.h \
     camera.h \
     clientthread.h \
-    serverthread.h
+    serverthread.h \
+    snowparticles.h \
+    pool.h
 
 SOURCES += \
     main.cpp

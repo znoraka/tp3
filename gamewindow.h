@@ -8,6 +8,7 @@
 #include "camera.h"
 #include "clientthread.h"
 #include "serverthread.h"
+#include "snowparticles.h"
 
 struct point
 {
@@ -56,6 +57,7 @@ private:
     ServerThread *sthread;
     QCursor* cursor;
     GLfloat* vertices;
+    SnowParticles *snow;
 
     int carte=1;
 
