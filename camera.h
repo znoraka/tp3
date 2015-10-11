@@ -30,7 +30,10 @@ private:
     int etat = 0;
     float rotX = -45.0;
     float rotY = -45.0;
+    float rotZ = .0;
     float ss = 1.0f;
+    float x = 0.5;
+    float y = 0.5;
     bool animated = false;
 };
 

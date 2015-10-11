@@ -20,4 +20,5 @@ RESOURCES += \
     gestionnaire.qrc
 
 QT += network
+QT += widgets
 CONFIG += c++11

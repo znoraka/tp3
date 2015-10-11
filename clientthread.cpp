@@ -3,15 +3,19 @@
 ClientThread::ClientThread()
 {
     connect(&socket, SIGNAL(readyRead()), this, SLOT(onData()));
-    connect(&socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onError()));
+    connect(&socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onError(QAbstractSocket::SocketError)));
     blockSize = 0;
     socket.abort();
     socket.connectToHost(QHostAddress::LocalHost, 1234);
-    qDebug() << socket.error();
 }
 
 void ClientThread::run()
 {
+}
+
+void ClientThread::init(ClientThread *client)
+{
+    client->start();
 }
 
 void ClientThread::onData()
@@ -28,9 +32,9 @@ void ClientThread::onData()
     qDebug() << "read :" << s;
 }
 
-void ClientThread::onError()
+void ClientThread::onError(QAbstractSocket::SocketError e)
 {
-    qDebug() << "error";
+    qDebug() << e;
 }
 
 

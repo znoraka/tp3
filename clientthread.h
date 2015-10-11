@@ -7,16 +7,17 @@
 #include <QDataStream>
 #include <QObject>
 
-class ClientThread : public QObject
+class ClientThread : public QThread
 {
     Q_OBJECT
 public:
     ClientThread();
     void run();
+    static void init(ClientThread *client);
 
 public slots:
     void onData();
-    void onError();
+    void onError(QAbstractSocket::SocketError e);
 
 signals:
     void seasonChangeSignal();

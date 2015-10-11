@@ -4,6 +4,7 @@
 #include <QtGui/QMatrix4x4>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QScreen>
+#include <QMainWindow>
 
 #include <QtCore/qmath.h>
 #include <QMouseEvent>
@@ -14,17 +15,43 @@
 
 #include <QtCore>
 #include <QtGui>
+#include <QPushButton>
+#include <QApplication>
+#include <QWidget>
 #include "camera.h"
+#include "serverthread.h"
 using namespace std;
 
 #define SERVER 1
 #define CLIENT 0
 
-GameWindow *createWindow(Camera* camera, float framerate, int type) {
+#define SUMMER "summer"
+#define AUTUMN "autumn"
+#define WINTER "winter"
+#define SPRING "spring"
+
+class ControllerWindow : public QMainWindow {
+public:
+    ControllerWindow()
+    {
+        server = new ServerThread();
+        button = new QPushButton();
+        this->setCentralWidget(button);
+        button->setText("Change season");
+        button->resize(100, 60);
+        connect(button, SIGNAL(clicked()), server, SLOT(onSeasonChangeRequest()));
+    }
+
+private:
+    ServerThread *server;
+    QPushButton *button;
+};
+
+GameWindow *createWindow(Camera* camera, float framerate) {
     QSurfaceFormat format;
     format.setSamples(16);
 
-    GameWindow *w = new GameWindow(camera, framerate, type);
+    GameWindow *w = new GameWindow(camera, framerate);
     w->setFormat(format);
     w->resize(480, 340);
     w->show();
@@ -36,16 +63,21 @@ GameWindow *createWindow(Camera* camera, float framerate, int type) {
 int main(int argc, char **argv)
 {
     srand(time(NULL));
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
+
+    ControllerWindow window;
+    window.show();
+    window.resize(200, 120);
+    window.move(1100, 400);
 
     Camera *c = new Camera();
-    GameWindow *g = createWindow(c, 1.0f / 120.0f, SERVER);
+    GameWindow *g = createWindow(c, 1.0f / 120.0f);
     g->setPosition(120, 10);
-    g = createWindow(c, 1.0f / 60.0f, CLIENT);
+    g = createWindow(c, 1.0f / 60.0f);
     g->setPosition(600, 10);
-    g = createWindow(c, 1.0f / 30.0f, CLIENT);
+    g = createWindow(c, 1.0f / 30.0f);
     g->setPosition(120, 400);
-    g = createWindow(c, 1.0f / 1.0f, CLIENT);
+    g = createWindow(c, 1.0f / 1.0f);
     g->setPosition(600, 400);
 
     return app.exec();

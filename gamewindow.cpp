@@ -22,19 +22,14 @@ GameWindow::GameWindow()
     camera = new Camera();
 }
 
-GameWindow::GameWindow(Camera *camera, float framerate, int type)
+GameWindow::GameWindow(Camera *camera, float framerate)
 {
     this->camera = camera;
     this->framerate = framerate;
 
-    if(type == 0) {
-        cthread = new ClientThread();
-        sthread = nullptr;
-        connect(cthread, SIGNAL(seasonChangeSignal()), this, SLOT(onSeasonChange()));
-    } else {
-        sthread = new ServerThread();
-//        sthread->start();
-    }
+    cthread = new ClientThread();
+    connect(cthread, SIGNAL(seasonChangeSignal()), this, SLOT(onSeasonChange()));
+    //    QtConcurrent::run(QThreadPool::globalInstance(), ClientThread::init, cthread);
 }
 
 void GameWindow::initialize()
@@ -45,99 +40,59 @@ void GameWindow::initialize()
     timer.start();
     this->connect(&timer, SIGNAL(timeout()), this, SLOT(renderNow()));
 
-    if(sthread != nullptr) {
-        sthread->onSeasonChangeRequest();
-    }
+    this->m_image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
 
-    loadMap(":/heightmap-2.png");
-}
+    this->vertices = initVertices(this->m_image.width(), this->m_image.height());
 
-void GameWindow::loadMap(QString localPath)
-{
+    this->cursor = new QCursor(Qt::BlankCursor);
+    this->setCursor(*cursor);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
-    if (QFile::exists(localPath)) {
-        m_image = QImage(localPath);
-    }
+    glEnable(GL_CULL_FACE);
 
-
-    uint id = 0;
-    p = new point[m_image.width() * m_image.height()];
-    QRgb pixel;
-    for(int i = 0; i < m_image.width(); i++)
-    {
-        for(int j = 0; j < m_image.height(); j++)
-        {
-
-            pixel = m_image.pixel(i,j);
-
-            id = i*m_image.width() +j;
-
-            p[id].x = (float)i/(m_image.width()) - ((float)m_image.width()/2.0)/m_image.width();
-            p[id].y = (float)j/(m_image.height()) - ((float)m_image.height()/2.0)/m_image.height();
-            p[id].z = 0.001f * (float)(qRed(pixel));
-        }
-    }
+    //    loadMap(":/heightmap-2.png");
 }
 
 void GameWindow::onSeasonChange()
 {
     //TODO changer la saison
     qDebug() << "on season change";
+    etat ++;
+    if(etat > 5)
+        etat = 0;
 }
 
 void GameWindow::render()
 {
-//    this->elapsed = timer.elapsed();
-
-//    if(this->elapsed > this->framerate) {
-//        this->render(this->elapsed);
-//        this->elapsed = 0;
-//        timer.start();
-//    }
     this->render(0);
 }
 
 void GameWindow::render(float delta)
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    this->cursor->setPos(this->position().x() + width() * 0.5f, this->position().y() + height() * 0.5f);
+
     this->camera->update(delta);
-//    this->camera->rotate(1, 0, 0);
 
-    switch(etat)
-    {
-    case 0:
-        displayPoints();
-        break;
-    case 1:
-        displayLines();
-        break;
-    case 2:
-        displayTriangles();
-        break;
-    case 3:
-        displayTrianglesC();
-        break;
-    case 4:
-        displayTrianglesTexture();
-        break;
-    case 5:
-
-        displayTrianglesTexture();
-        displayLines();
-        break;
-    default:
-        displayPoints();
-        break;
-    }
-
-
+    drawTriangles();
     ++m_frame;
 }
 
 bool GameWindow::event(QEvent *event)
 {
+    QMouseEvent *mouseEvent;
+    float deltaX = this->width() * 0.5f;
+    float deltaY = this->height() * 0.5f;
     switch (event->type())
     {
+    case QEvent::MouseMove:
+        mouseEvent = static_cast<QMouseEvent*>(event);
+        camera->rotate(-(deltaY - mouseEvent->y()) * 0.1f,
+                       0,
+                       -(deltaX - mouseEvent->x()) * 0.1f
+                       );
+        return true;
     case QEvent::UpdateRequest:
 
         renderNow();
@@ -160,17 +115,25 @@ void GameWindow::keyPressEvent(QKeyEvent *event)
     case 'S':
         camera->scale(-0.10f, -0.10f, 0);
         break;
-    case 'A':
+    case Qt::Key_Up:
         camera->rotate(1.0f, 0, 0);
         break;
-    case 'E':
+    case Qt::Key_Down:
         camera->rotate(-1.0f, 0, 0);
         break;
-    case 'Q':
-        camera->rotate(0, 1.0f, 0);
+    case Qt::Key_Left:
+        camera->rotate(0, 0, -1);
         break;
-    case 'D':
-        camera->rotate(0, -1.0f, 0);
+    case Qt::Key_Right:
+        camera->rotate(0, 0, 1);
+        break;
+    case Qt::Key_Space:
+        if(fill) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        } else {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+        fill = !fill;
         break;
     case 'W':
         etat ++;
@@ -201,279 +164,75 @@ void GameWindow::keyPressEvent(QKeyEvent *event)
         depth += QString::number(carte) ;
         depth += ".png" ;
 
-        loadMap(depth);
+//        loadMap(depth);
         break;
     }
     renderNow();
 }
 
-
-void GameWindow::displayPoints()
+void GameWindow::drawTriangles()
 {
-    glColor3f(1.0f, 1.0f, 1.0f);
-    glBegin(GL_POINTS);
-    uint id = 0;
-    for(int i = 0; i < m_image.width(); i++)
-    {
-        for(int j = 0; j < m_image.height(); j++)
-        {
-            id = i*m_image.width() +j;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
 
+    int countX = m_image.width();
+    int countY = m_image.height();
+    int count = countX * countY * 3 * 2 + countX * 3 + 3;
+    glBegin(GL_TRIANGLE_STRIP);
+    for (int var = 0; var < count; var += 3) {
+        if(vertices[var + 2] < 0.08) {
+            glColor3f(vertices[var + 2], 0.4, 0);
+        } else if (vertices[var + 2] > 0.08 && vertices[var + 2] < 0.15) {
+            glColor3f(0.54, 0.27 + vertices[var + 2], 0.07);
+        } else {
+            glColor3f(0.9, 0.8, 0.9);
         }
+        glVertex3f(vertices[var], vertices[var + 1], vertices[var + 2]);
     }
     glEnd();
 }
 
-
-void GameWindow::displayTriangles()
+GLfloat *GameWindow::initVertices(GLint countX, GLint countY)
 {
-    glColor3f(1.0f, 1.0f, 1.0f);
-    glBegin(GL_TRIANGLES);
-    uint id = 0;
+    int count = countX * countY * 3 * 2 + countX * 3 + 3;
+    qDebug() << count;
+    GLfloat *array = new GLfloat[count];
+    GLfloat stepX = 1.0 / (countX);
+    GLfloat stepY = 1.0 / (countY);
+    int cpt = 0;
 
-    for(int i = 0; i < m_image.width()-1; i++)
-    {
-        for(int j = 0; j < m_image.height()-1; j++)
-        {
+    float posX = -0.5f;
+    float posY = -0.5f;
 
-            id = i*m_image.width() +j;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = i*m_image.width() +(j+1);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = (i+1)*m_image.width() +j;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
+    int flop = 1;
 
+    for (int i = 0; i < countX; ++i) {
+        for (int j = 0; j < countY; ++j) {
+            array[cpt++] = posX;
+            array[cpt++] = posY;
+            array[cpt++] = getRandomZ(posX, posY);
 
+            array[cpt++] = posX + stepX;
+            array[cpt++] = posY;
+            array[cpt++] = getRandomZ(posX + stepX, posY);
 
-            id = i*m_image.width() +(j+1);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = (i+1)*m_image.width() +j+1;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = (i+1)*m_image.width() +j;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
+            posY += stepY * flop;
         }
+
+        array[cpt++] = posX;
+        array[cpt++] = posY;
+        array[cpt++] = getRandomZ(posX, posY);
+
+        flop *= -1;
+        posX += stepX;
     }
 
-    glEnd();
+    array[cpt++] = posX;
+    array[cpt++] = posY;
+    array[cpt++] = getRandomZ(posX, posY);
+    qDebug() << cpt;
+    return array;
 }
 
-void GameWindow::displayTrianglesC()
+float GameWindow::getRandomZ(float i, float j)
 {
-    glColor3f(1.0f, 1.0f, 1.0f);
-    glBegin(GL_TRIANGLES);
-    uint id = 0;
-
-    for(int i = 0; i < m_image.width()-1; i++)
-    {
-        for(int j = 0; j < m_image.height()-1; j++)
-        {
-            glColor3f(0.0f, 1.0f, 0.0f);
-            id = i*m_image.width() +j;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = i*m_image.width() +(j+1);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = (i+1)*m_image.width() +j;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-
-
-            glColor3f(1.0f, 1.0f, 1.0f);
-            id = i*m_image.width() +(j+1);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = (i+1)*m_image.width() +j+1;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = (i+1)*m_image.width() +j;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-        }
-    }
-    glEnd();
-}
-
-
-void GameWindow::displayLines()
-{
-    glColor3f(1.0f, 1.0f, 1.0f);
-    glBegin(GL_LINES);
-    uint id = 0;
-
-    for(int i = 0; i < m_image.width()-1; i++)
-    {
-        for(int j = 0; j < m_image.height()-1; j++)
-        {
-
-            id = i*m_image.width() +j;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = i*m_image.width() +(j+1);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-
-            id = (i+1)*m_image.width() +j;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = i*m_image.width() +j;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-
-            id = (i+1)*m_image.width() +j;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = i*m_image.width() +(j+1);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-
-            id = i*m_image.width() +(j+1);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = (i+1)*m_image.width() +j+1;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-
-            id = (i+1)*m_image.width() +j+1;
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-
-            id = (i+1)*m_image.width() +(j);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-        }
-    }
-
-    glEnd();
-}
-
-void GameWindow::displayTrianglesTexture()
-{
-    glColor3f(1.0f, 1.0f, 1.0f);
-    glBegin(GL_TRIANGLES);
-    uint id = 0;
-
-    for(int i = 0; i < m_image.width()-1; i++)
-    {
-        for(int j = 0; j < m_image.height()-1; j++)
-        {
-
-            id = i*m_image.width() +j;
-            displayColor(p[id].z);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = i*m_image.width() +(j+1);
-            displayColor(p[id].z);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = (i+1)*m_image.width() +j;
-            displayColor(p[id].z);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-
-
-
-            id = i*m_image.width() +(j+1);
-            displayColor(p[id].z);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = (i+1)*m_image.width() +j+1;
-            displayColor(p[id].z);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-            id = (i+1)*m_image.width() +j;
-            displayColor(p[id].z);
-            glVertex3f(
-                        p[id].x,
-                        p[id].y,
-                        p[id].z);
-        }
-    }
-    glEnd();
-}
-
-
-void GameWindow::displayColor(float alt)
-{
-    if (alt > 0.2)
-    {
-        glColor3f(01.0f, 1.0f, 1.0f);
-    }
-    else     if (alt > 0.1)
-    {
-        glColor3f(alt, 1.0f, 1.0f);
-    }
-    else     if (alt > 0.05f)
-    {
-        glColor3f(01.0f, alt, alt);
-    }
-    else
-    {
-        glColor3f(0.0f, 0.0f, 1.0f);
-    }
-
+    return qGray(this->m_image.pixel((this->m_image.width() * (i + 0.5f)), (this->m_image.height() * (j + 0.5f)))) * 0.0008f;
 }

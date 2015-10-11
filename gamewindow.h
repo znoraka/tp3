@@ -2,6 +2,8 @@
 #define GAMEWINDOW_H
 
 #include "openglwindow.h"
+#include <QtConcurrent/QtConcurrent>
+#include <QCursor>
 #include "QTimer"
 #include "camera.h"
 #include "clientthread.h"
@@ -19,7 +21,7 @@ class GameWindow : public OpenGLWindow
     Q_OBJECT
 public:
     GameWindow();
-    GameWindow(Camera* camera, float framerate, int type);
+    GameWindow(Camera* camera, float framerate);
 
     void initialize();
     void render();
@@ -28,6 +30,7 @@ public:
 
     void keyPressEvent(QKeyEvent *event);
 
+    void drawTriangles();
     void displayTriangles();
     void displayLines();
     void displayTrianglesC();
@@ -42,6 +45,8 @@ public slots:
     void onSeasonChange();
 
 private:
+    GLfloat *initVertices(GLint countX, GLint county);
+    GLfloat getRandomZ(float x, float y);
 
     int m_frame;
     QImage m_image;
@@ -49,6 +54,8 @@ private:
     Camera *camera;
     ClientThread *cthread;
     ServerThread *sthread;
+    QCursor* cursor;
+    GLfloat* vertices;
 
     int carte=1;
 
@@ -60,6 +67,7 @@ private:
     float deltaTime = 0;
     float elapsed = 0;
     float lastUpdate = 0;
+    bool fill = false;
     QTimer timer;
 };
 

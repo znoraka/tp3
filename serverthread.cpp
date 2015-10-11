@@ -27,8 +27,10 @@ void ServerThread::onNewClient()
 
 void ServerThread::onSeasonChangeRequest()
 {
+    qDebug() << "button pressed";
     QString s = "change season please";
        foreach (QTcpSocket *socket, clients) {
         socket->write(s.toUtf8());
+        socket->flush();
     }
 }
