@@ -16,7 +16,7 @@
 #include <QtGui>
 using namespace std;
 
-
+static int firstSeason = 0;
 GameWindow::GameWindow()
 {
     camera = new Camera();
@@ -29,11 +29,20 @@ GameWindow::GameWindow(Camera *camera, float framerate)
 
     cthread = new ClientThread();
     connect(cthread, SIGNAL(seasonChangeSignal()), this, SLOT(onSeasonChange()));
-    //    QtConcurrent::run(QThreadPool::globalInstance(), ClientThread::init, cthread);
 }
 
 void GameWindow::initialize()
 {
+    //    point p1, p2, p3;
+    //    p1.x = 0; p1.y = 0; p1.z = 0;
+    //    p2.x = 0.5; p2.y = 0; p2.z = 0;
+    //    p3.x = 0; p3.y = 0.5, p3.z = 0;
+    //    std::vector<float> p = getNormal(p1, p2, p3);
+    //    qDebug() << "normal = " << p[0] << ", " << p[1] << ", " << p[2];
+
+
+    //    SnowParticles *pa;
+    //    pa->draw(0);
 
     timer.setInterval(framerate * 1000);
     this->camera->initialize(devicePixelRatio(), width(), height(), 0, 100.0);
@@ -48,20 +57,24 @@ void GameWindow::initialize()
     this->setCursor(*cursor);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-
+    glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_CULL_FACE);
 
     snow = new SnowParticles(1000, 1000, &this->m_image);
-    //    loadMap(":/heightmap-2.png");
+    rain = new RainParticles(0, 0, &this->m_image);
+    this->season = firstSeason++;
+
+
 }
 
 void GameWindow::onSeasonChange()
 {
     //TODO changer la saison
-    qDebug() << "on season change";
-    etat ++;
-    if(etat > 5)
-        etat = 0;
+    snow->reset();
+    rain->reset();
+    if(++season >= 4) season = 0;
+    qDebug() << season;
+
 }
 
 void GameWindow::render()
@@ -72,13 +85,38 @@ void GameWindow::render()
 void GameWindow::render(float delta)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    this->cursor->setPos(this->position().x() + width() * 0.5f, this->position().y() + height() * 0.5f);
-
+    if(cursorCaptured) {
+        this->cursor->setPos(this->position().x() + width() * 0.5f, this->position().y() + height() * 0.5f);
+    }
     this->camera->update(delta);
 
+    //    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Active la correction de perspective (pour ombrage, texture, ...)
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    // Create light components
+    GLfloat ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    GLfloat diffuseLight[] = { 0.8f, 0.8f, 0.8, 1.0f };
+    GLfloat specularLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    GLfloat position[] = { -1.5f, 1.0f, -4.0f, 1.0f };
+
+    // Assign created components to GL_LIGHT0
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+
     drawTriangles();
-    snow->update(delta);
-    snow->draw(delta);
+    if(season == 0) {
+        snow->update(delta);
+        snow->draw(delta);
+    } else if (season == 1) {
+        rain->update(delta);
+        rain->draw(delta);
+    }
+
     ++m_frame;
 }
 
@@ -90,11 +128,16 @@ bool GameWindow::event(QEvent *event)
     switch (event->type())
     {
     case QEvent::MouseMove:
-        mouseEvent = static_cast<QMouseEvent*>(event);
-        camera->rotate(-(deltaY - mouseEvent->y()) * 0.1f,
-                       0,
-                       -(deltaX - mouseEvent->x()) * 0.1f
-                       );
+        if(cursorCaptured) {
+            mouseEvent = static_cast<QMouseEvent*>(event);
+            camera->rotate(-(deltaY - mouseEvent->y()) * 0.1f,
+                           0,
+                           -(deltaX - mouseEvent->x()) * 0.1f
+                           );
+        }
+        return true;
+    case QEvent::MouseButtonPress:
+        cursorCaptured = true;
         return true;
     case QEvent::UpdateRequest:
 
@@ -110,6 +153,10 @@ void GameWindow::keyPressEvent(QKeyEvent *event)
     switch(event->key())
     {
     case Qt::Key_Escape:
+        cursorCaptured = false;
+        //        qApp->exit();
+        break;
+    case Qt::Key_Tab:
         qApp->exit();
         break;
     case 'Z':
@@ -167,7 +214,7 @@ void GameWindow::keyPressEvent(QKeyEvent *event)
         depth += QString::number(carte) ;
         depth += ".png" ;
 
-//        loadMap(depth);
+        //        loadMap(depth);
         break;
     }
     renderNow();
@@ -176,20 +223,44 @@ void GameWindow::keyPressEvent(QKeyEvent *event)
 void GameWindow::drawTriangles()
 {
 
+    GLfloat f[4] = {1, 1, 1, 1};
+    GLfloat f1[4] = {1, 1, 1, 1};
+    GLfloat f2[4] = {1, 1, 1, 1};
+    //    glMaterialf(GL_FRONT, GL_SHININESS, 10.0);
+    //        glMaterialfv(GL_FRONT, GL_DIFFUSE, f);
+    //        glMaterialfv(GL_FRONT, GL_SPECULAR, f);
+    //        glMaterialfv(GL_FRONT, GL_AMBIENT, f);
+    //        glMaterialfv(GL_FRONT, GL_DIFFUSE, f);
+    //        glMaterialfv(GL_FRONT, GL_SPECULAR, f1);
+    //        glMaterialfv(GL_FRONT, GL_AMBIENT, f);
+
+    float greenDiff[4] = {0, 1, 0, 1};
+    float greenSpec[4] = {0, 1, 0, 1};
+    float greenAmb[4] = {0, 1, 0, 1};
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, greenDiff);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, greenSpec);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, greenAmb);
+    glMaterialf(GL_FRONT, GL_SHININESS, 10.0);
+
     int countX = m_image.width();
     int countY = m_image.height();
     int count = countX * countY * 3 * 2 + countX * 3 + 3;
     glBegin(GL_TRIANGLE_STRIP);
-    for (int var = 0; var < count; var += 3) {
+    for (int var = 0; var < count - 9; var += 3) {
         if(vertices[var + 2] < 0.08) {
-            glColor3f(vertices[var + 2], 0.4, 0);
+            f[0] = vertices[var + 2]; f[1] = 0.4; f[2] = 0; f[3] = 1;
+            f1[0] = vertices[var + 2] - 0.01; f1[1] = 0.3; f1[2] = 0.1; f[3] = 1;
+            //            glColor3f(vertices[var + 2], 0.4, 0);
         } else if (vertices[var + 2] > 0.08 && vertices[var + 2] < 0.15) {
-            glColor3f(0.54, 0.27 + vertices[var + 2], 0.07);
+            f[0] = 0.54; f[1] = 0.27 + vertices[var + 2]; f[2] = 0.07; f[3] = 1;
+            f1[0] = 1; f1[1] = 1; f1[2] = 2; f1[3] = 1;
+            //            glColor3f(0.54, 0.27 + vertices[var + 2], 0.07);
         } else {
-            glColor3f(0.9, 0.8, 0.9);
+            f[0] = 0.9; f[1] = 0.8; f[2] = 0.9; f[3] = 1;
+            //            glColor3f(0.9, 0.8, 0.9);
         }
+        glNormal3f(normals[var / 3]->x, normals[var / 3]->y, normals[var / 3]->z);
         glVertex3f(vertices[var], vertices[var + 1], vertices[var + 2]);
-//        std::cout << vertices[var] << ", " << vertices[var+1] << ", " << vertices[var+2] <<std::endl << "******" << std::endl;
     }
     glEnd();
 }
@@ -221,6 +292,8 @@ GLfloat *GameWindow::initVertices(GLint countX, GLint countY)
             posY += stepY * flop;
         }
 
+        qDebug() << "cpt step" << cpt;
+
         array[cpt++] = posX;
         array[cpt++] = posY;
         array[cpt++] = getRandomZ(posX, posY);
@@ -232,8 +305,56 @@ GLfloat *GameWindow::initVertices(GLint countX, GLint countY)
     array[cpt++] = posX;
     array[cpt++] = posY;
     array[cpt++] = getRandomZ(posX, posY);
-    qDebug() << cpt;
+    int cpt2 = 0;
+    flop = -1;
+    for (int var = 0; var < cpt - 9; var += 3) {
+        point p1, p2, p3;
+        p1.x = array[var+0]; p1.y = array[var+1]; p1.z = array[var+2];
+        p2.x = array[var+3]; p2.y = array[var+4]; p2.z = array[var+5];
+        p3.x = array[var+6]; p3.y = array[var+7]; p3.z = array[var+8];
+        std::vector<float> n;
+        //        if(flop == -1) {
+        if(p1.x == p2.x && p1.y < p2.y) {
+            n = getNormal(p1, p2, p3);
+        } else if(p1.x != p2.x && p1.y > p2.y) {
+            n = getNormal(p1, p3, p2);
+        } else if(p1.x == p2.x && p1.y > p2.y){
+            n = getNormal(p1, p3, p2);
+        } else {
+            n = getNormal(p1, p2, p3);
+        }
+        //                n = getNormal(p1, p2 , p3);
+        //            else n = getNormal(p1, p3 , p2);
+        //        } else {
+        //            if((var / 3) % 2 == 0) n = getNormal(p1, p2 , p3);
+        //            else n = getNormal(p1, p3 , p2);
+        //        }
+        point *p = new point(); p->x = n[0]; p->y = n[1]; p->z = n[2];
+        //                qDebug() << p->x << ", " << p->y << ", " << p->z;
+        normals.push_back(p);
+
+        if(cpt2++ > countY * 2) {
+            qDebug() << "cpt2 = " << cpt2;
+            cpt2 = 0;
+            flop *= -1;
+        }
+    }
     return array;
+}
+
+std::vector<float> GameWindow::getNormal(point t1, point t2, point t3)
+{
+    point v, w, n;
+    v.x = t2.x - t1.x; v.y = t2.y - t1.y; v.z = t2.z- t1.z;
+    w.x = t3.x - t1.x; w.y = t3.y - t1.y; w.z = t3.z- t1.z;
+
+    n.x = v.y * w.z - v.z * w.y;
+    n.y = v.z * w.x - v.x * w.z;
+    n.z = v.x * w.y - v.y * w.x;
+    float l = sqrt(pow(n.x, 2)) + sqrt(pow(n.y, 2)) + sqrt(pow(n.z, 2));
+    if(l == 0) l = 1;
+    std::vector<float> res = {n.x / l, n.y / l, n.z / l};
+    return res;
 }
 
 float GameWindow::getRandomZ(float i, float j)

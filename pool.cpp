@@ -1,3 +1,6 @@
+#ifndef POOLABLE_C
+#define POOLABLE_C
+
 #include "pool.h"
 
 template<typename T>
@@ -26,5 +29,7 @@ void Pool<T>::release(T object)
         objects.push(object);
     }
 }
+
+#endif
 
 

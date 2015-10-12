@@ -9,18 +9,25 @@ SnowParticles::SnowParticles(int width, int height, QImage *image)
     for (int i = 0; i < width; ++i) {
         snow[i] = new float[height];
     }
+    for (int i = 0; i < width; ++i) {
+        for (int j = 0; j < height; ++j) {
+            snow[i][j] = 0;
+        }
+    }
     this->image = image;
 
-    for (int i = 0; i < 1000; ++i) {
-        snowFlakes.push_back(createSnowFlake(SnowFlake::pool->obtain()));
-    }
+//    for (int i = 0; i < 1000; ++i) {
+//        snowFlakes.push_back(createSnowFlake(SnowFlake::pool->obtain()));
+//    }
 
 }
 
 void SnowParticles::update(float delta)
 {
-//    snowFlakes.push_back(createSnowFlake());
-    std::cout << delta << std::endl;
+    if(snowFlakes.size() < 500 && qrand() % 100 < 5) {
+        snowFlakes.push_back(createSnowFlake(SnowFlake::pool->obtain()));
+    }
+
     for (int i = 0; i < snowFlakes.size(); ++i) {
         SnowFlake *s = snowFlakes[i];
         s->z -= s->speed * delta;
@@ -56,6 +63,19 @@ void SnowParticles::draw(float delta)
         }
     }
     glEnd();
+}
+
+void SnowParticles::reset()
+{
+    for (int i = 0; i < snowFlakes.size(); ++i) {
+        SnowFlake::pool->release(snowFlakes[i]);
+    }
+    snowFlakes.clear();
+    for (int i = 0; i < width; ++i) {
+        for (int j = 0; j < height; ++j) {
+            snow[i][j] = 0;
+        }
+    }
 }
 
 SnowFlake *SnowParticles::createSnowFlake(SnowFlake *s)

@@ -9,6 +9,7 @@
 #include "clientthread.h"
 #include "serverthread.h"
 #include "snowparticles.h"
+#include "rainparticles.h"
 
 struct point
 {
@@ -48,6 +49,7 @@ public slots:
 private:
     GLfloat *initVertices(GLint countX, GLint county);
     GLfloat getRandomZ(float x, float y);
+    std::vector<float> getNormal(point t1, point t2, point t3);
 
     int m_frame;
     QImage m_image;
@@ -58,9 +60,13 @@ private:
     QCursor* cursor;
     GLfloat* vertices;
     SnowParticles *snow;
+    RainParticles *rain;
+    bool cursorCaptured = false;
+    std::vector<point*> normals;
 
     int carte=1;
 
+    int season = 0;
     int etat = 0;
     float rotX = -45.0;
     float rotY = -45.0;

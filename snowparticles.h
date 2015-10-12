@@ -26,6 +26,7 @@ public:
     SnowParticles(int width, int height, QImage *image);
     void update(float delta);
     void draw(float delta);
+    void reset();
 private:
     int width;
     int height;

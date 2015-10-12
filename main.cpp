@@ -71,13 +71,13 @@ int main(int argc, char **argv)
     window.move(1100, 400);
 
     Camera *c = new Camera();
-    GameWindow *g = createWindow(c, 1.0f / 120.0f);
+    GameWindow *g = createWindow(c, 1.0f / 60.0f);
     g->setPosition(120, 10);
     g = createWindow(c, 1.0f / 60.0f);
     g->setPosition(600, 10);
-    g = createWindow(c, 1.0f / 30.0f);
+    g = createWindow(c, 1.0f / 60.0f);
     g->setPosition(120, 400);
-    g = createWindow(c, 1.0f / 1.0f);
+    g = createWindow(c, 1.0f / 60.0f);
     g->setPosition(600, 400);
 
     return app.exec();
