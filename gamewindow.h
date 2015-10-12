@@ -2,7 +2,6 @@
 #define GAMEWINDOW_H
 
 #include "openglwindow.h"
-#include <QtConcurrent/QtConcurrent>
 #include <QCursor>
 #include "QTimer"
 #include "camera.h"
@@ -15,8 +14,6 @@ struct point
 {
     float x, y ,z;
 };
-
-
 
 class GameWindow : public OpenGLWindow
 {
@@ -50,6 +47,7 @@ private:
     GLfloat *initVertices(GLint countX, GLint county);
     GLfloat getRandomZ(float x, float y);
     std::vector<float> getNormal(point t1, point t2, point t3);
+    GLuint loadShader(GLenum type, const char *source);
 
     int m_frame;
     QImage m_image;

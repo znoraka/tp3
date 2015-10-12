@@ -33,17 +33,6 @@ GameWindow::GameWindow(Camera *camera, float framerate)
 
 void GameWindow::initialize()
 {
-    //    point p1, p2, p3;
-    //    p1.x = 0; p1.y = 0; p1.z = 0;
-    //    p2.x = 0.5; p2.y = 0; p2.z = 0;
-    //    p3.x = 0; p3.y = 0.5, p3.z = 0;
-    //    std::vector<float> p = getNormal(p1, p2, p3);
-    //    qDebug() << "normal = " << p[0] << ", " << p[1] << ", " << p[2];
-
-
-    //    SnowParticles *pa;
-    //    pa->draw(0);
-
     timer.setInterval(framerate * 1000);
     this->camera->initialize(devicePixelRatio(), width(), height(), 0, 100.0);
     timer.start();
@@ -63,8 +52,6 @@ void GameWindow::initialize()
     snow = new SnowParticles(1000, 1000, &this->m_image);
     rain = new RainParticles(0, 0, &this->m_image);
     this->season = firstSeason++;
-
-
 }
 
 void GameWindow::onSeasonChange()
@@ -110,12 +97,19 @@ void GameWindow::render(float delta)
 
     drawTriangles();
     if(season == 0) {
-        snow->update(delta);
-        snow->draw(delta);
+        rain->setActive(false);
+        snow->setActive(true);
     } else if (season == 1) {
-        rain->update(delta);
-        rain->draw(delta);
+        rain->setActive(true);
+        snow->setActive(false);
+    } else {
+        rain->setActive(false);
+        snow->setActive(false);
     }
+    snow->update(delta);
+    snow->draw(delta);
+    rain->update(delta);
+    rain->draw(delta);
 
     ++m_frame;
 }
@@ -237,9 +231,6 @@ void GameWindow::drawTriangles()
     float greenDiff[4] = {0, 1, 0, 1};
     float greenSpec[4] = {0, 1, 0, 1};
     float greenAmb[4] = {0, 1, 0, 1};
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, greenDiff);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, greenSpec);
-    glMaterialfv(GL_FRONT, GL_AMBIENT, greenAmb);
     glMaterialf(GL_FRONT, GL_SHININESS, 10.0);
 
     int countX = m_image.width();
@@ -248,16 +239,11 @@ void GameWindow::drawTriangles()
     glBegin(GL_TRIANGLE_STRIP);
     for (int var = 0; var < count - 9; var += 3) {
         if(vertices[var + 2] < 0.08) {
-            f[0] = vertices[var + 2]; f[1] = 0.4; f[2] = 0; f[3] = 1;
-            f1[0] = vertices[var + 2] - 0.01; f1[1] = 0.3; f1[2] = 0.1; f[3] = 1;
-            //            glColor3f(vertices[var + 2], 0.4, 0);
+            glColor3f(vertices[var + 2], 0.4, 0);
         } else if (vertices[var + 2] > 0.08 && vertices[var + 2] < 0.15) {
-            f[0] = 0.54; f[1] = 0.27 + vertices[var + 2]; f[2] = 0.07; f[3] = 1;
-            f1[0] = 1; f1[1] = 1; f1[2] = 2; f1[3] = 1;
-            //            glColor3f(0.54, 0.27 + vertices[var + 2], 0.07);
+            glColor3f(0.54, 0.27 + vertices[var + 2], 0.07);
         } else {
-            f[0] = 0.9; f[1] = 0.8; f[2] = 0.9; f[3] = 1;
-            //            glColor3f(0.9, 0.8, 0.9);
+            glColor3f(0.9, 0.8, 0.9);
         }
         glNormal3f(normals[var / 3]->x, normals[var / 3]->y, normals[var / 3]->z);
         glVertex3f(vertices[var], vertices[var + 1], vertices[var + 2]);
@@ -268,7 +254,6 @@ void GameWindow::drawTriangles()
 GLfloat *GameWindow::initVertices(GLint countX, GLint countY)
 {
     int count = countX * countY * 3 * 2 + countX * 3 + 3;
-    qDebug() << count;
     GLfloat *array = new GLfloat[count];
     GLfloat stepX = 1.0 / (countX);
     GLfloat stepY = 1.0 / (countY);
@@ -292,8 +277,6 @@ GLfloat *GameWindow::initVertices(GLint countX, GLint countY)
             posY += stepY * flop;
         }
 
-        qDebug() << "cpt step" << cpt;
-
         array[cpt++] = posX;
         array[cpt++] = posY;
         array[cpt++] = getRandomZ(posX, posY);
@@ -305,15 +288,12 @@ GLfloat *GameWindow::initVertices(GLint countX, GLint countY)
     array[cpt++] = posX;
     array[cpt++] = posY;
     array[cpt++] = getRandomZ(posX, posY);
-    int cpt2 = 0;
-    flop = -1;
     for (int var = 0; var < cpt - 9; var += 3) {
         point p1, p2, p3;
         p1.x = array[var+0]; p1.y = array[var+1]; p1.z = array[var+2];
         p2.x = array[var+3]; p2.y = array[var+4]; p2.z = array[var+5];
         p3.x = array[var+6]; p3.y = array[var+7]; p3.z = array[var+8];
         std::vector<float> n;
-        //        if(flop == -1) {
         if(p1.x == p2.x && p1.y < p2.y) {
             n = getNormal(p1, p2, p3);
         } else if(p1.x != p2.x && p1.y > p2.y) {
@@ -323,21 +303,9 @@ GLfloat *GameWindow::initVertices(GLint countX, GLint countY)
         } else {
             n = getNormal(p1, p2, p3);
         }
-        //                n = getNormal(p1, p2 , p3);
-        //            else n = getNormal(p1, p3 , p2);
-        //        } else {
-        //            if((var / 3) % 2 == 0) n = getNormal(p1, p2 , p3);
-        //            else n = getNormal(p1, p3 , p2);
-        //        }
-        point *p = new point(); p->x = n[0]; p->y = n[1]; p->z = n[2];
-        //                qDebug() << p->x << ", " << p->y << ", " << p->z;
-        normals.push_back(p);
 
-        if(cpt2++ > countY * 2) {
-            qDebug() << "cpt2 = " << cpt2;
-            cpt2 = 0;
-            flop *= -1;
-        }
+        point *p = new point(); p->x = n[0]; p->y = n[1]; p->z = n[2];
+        normals.push_back(p);
     }
     return array;
 }

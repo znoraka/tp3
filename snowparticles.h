@@ -27,12 +27,14 @@ public:
     void update(float delta);
     void draw(float delta);
     void reset();
+    void setActive(bool active);
 private:
     int width;
     int height;
     float **snow;
     QImage *image;
     QVector<SnowFlake*> snowFlakes;
+    bool isActive;
 
     SnowFlake *createSnowFlake(SnowFlake *s);
 };

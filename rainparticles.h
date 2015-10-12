@@ -6,6 +6,7 @@
 #include <QRgb>
 #include <QtGui/QOpenGLFunctions>
 #include <iostream>
+#include <QtGui/QOpenGLShaderProgram>
 
 #include "pool.cpp"
 
@@ -27,13 +28,15 @@ public:
     void update(float delta);
     void draw(float delta);
     void reset();
+    void setActive(bool active);
 private:
     int width;
     int height;
     float waterHeight;
     QImage *image;
     QVector<RainDrop*> rainDrops;
-
+    float elapsed;
+    bool isActive;
     RainDrop *createRainDrops(RainDrop *s);
 };
 
