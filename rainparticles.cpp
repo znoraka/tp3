@@ -1,6 +1,5 @@
 #include "rainparticles.h"
 Pool<RainDrop *> *RainDrop::pool = new Pool<RainDrop*>([] () {return new RainDrop();});
-GLfloat RainParticles::lightPos[4] = {1.0, 0.0, -0.7, 1.0};
 
 RainParticles::RainParticles(int width, int height, QImage *image)
 {
@@ -39,6 +38,15 @@ void RainParticles::update(float delta)
 
 void RainParticles::draw(float delta)
 {
+    if(qrand() % 1000 < 100) {
+        lightningX = ((qrand() % 100) - 50) * 0.01;
+        lightningY = ((qrand() % 100) - 50) * 0.01;
+    }
+    if(qrand() % 1000 > 700) {
+        lightningX = -2;
+        lightningY = -2;
+    }
+
     elapsed += delta * 10;
     if(isActive) {
         glPointSize(1);
@@ -50,6 +58,21 @@ void RainParticles::draw(float delta)
             glVertex3f(s->x, s->y, s->z + 0.01);
         }
         glEnd();
+
+        if(lightningX > -2) {
+            glColor3f(1, 1, 1);
+            glBegin(GL_LINE_STRIP);
+            float f1, f2, f3;
+            f1 = ((qrand() % 10) - 5) * 0.1;
+            f2 = ((qrand() % 10) - 5) * 0.01;
+            f3 = ((qrand() % 10) - 5) * 0.01;
+            glVertex3f(lightningX + f1, lightningY + f1, 10);
+            glVertex3f(lightningX + f3, lightningY + f2, 0.7);
+            glVertex3f(lightningX + f2, lightningY, 0.3);
+            glVertex3f(lightningX, lightningY, 0);
+            //    glVertex3f(0.5, 0.5, 1);
+            glEnd();
+        }
     }
 
     if(waterHeight > 0.000) {

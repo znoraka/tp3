@@ -10,6 +10,7 @@
 #include "snowparticles.h"
 #include "rainparticles.h"
 #include "drought.h"
+#include "spring.h"
 #include "utils.h"
 
 class GameWindow : public OpenGLWindow
@@ -60,6 +61,7 @@ private:
     SnowParticles *snow;
     RainParticles *rain;
     Drought *drought;
+    Spring *spring;
 
     int carte=1;
 

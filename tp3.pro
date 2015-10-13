@@ -8,7 +8,8 @@ SOURCES += $$PWD/openglwindow.cpp \
     pool.cpp \
     rainparticles.cpp \
     drought.cpp \
-    utils.cpp
+    utils.cpp \
+    spring.cpp
 HEADERS += $$PWD/openglwindow.h \
     gamewindow.h \
     camera.h \
@@ -18,7 +19,8 @@ HEADERS += $$PWD/openglwindow.h \
     pool.h \
     rainparticles.h \
     drought.h \
-    utils.h
+    utils.h \
+    spring.h
 
 SOURCES += \
     main.cpp

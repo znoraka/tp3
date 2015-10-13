@@ -41,6 +41,7 @@ private:
     QVector<RainDrop*> rainDrops;
     float elapsed;
     bool isActive;
+    float lightningX, lightningY;
     RainDrop *createRainDrops(RainDrop *s);
 };
 

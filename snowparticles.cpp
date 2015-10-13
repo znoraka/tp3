@@ -1,6 +1,5 @@
 #include "snowparticles.h"
 Pool<SnowFlake *> *SnowFlake::pool = new Pool<SnowFlake*>([] () {return new SnowFlake();});
-GLfloat SnowParticles::lightPos[4] = {1.0, 0.0, -0.4, 1.0};
 
 SnowParticles::SnowParticles(int width, int height, QImage *image)
 {
@@ -26,7 +25,7 @@ SnowParticles::SnowParticles(int width, int height, QImage *image)
 void SnowParticles::update(float delta)
 {
     if(isActive) {
-        if(snowFlakes.size() < 700 && qrand() % 100 < 100) {
+        if(snowFlakes.size() < 700 && qrand() % 100 < 50) {
             snowFlakes.push_back(createSnowFlake(SnowFlake::pool->obtain()));
         }
 #pragma omp parallel for
@@ -94,11 +93,6 @@ void SnowParticles::reset()
         SnowFlake::pool->release(snowFlakes[i]);
     }
     snowFlakes.clear();
-    //    for (int i = 0; i < width; ++i) {
-    //        for (int j = 0; j < height; ++j) {
-    //            snow[i][j] = 0;
-    //        }
-    //    }
 }
 
 void SnowParticles::setActive(bool active)

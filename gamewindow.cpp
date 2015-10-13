@@ -54,6 +54,7 @@ void GameWindow::initialize()
     snow = new SnowParticles(1000, 1000, &this->m_image);
     rain = new RainParticles(0, 0, &this->m_image);
     drought = new Drought();
+    spring = new Spring(&this->m_image);
     this->season = firstSeason++;
 }
 
@@ -101,16 +102,20 @@ void GameWindow::render(float delta)
     if(season == 0) {
         snow->setActive(true);
         rain->setActive(false);
+        spring->setActive(false);
         drought->setActive(false);
     } else if (season == 3) {
         rain->setActive(true);
         snow->setActive(false);
+        spring->setActive(false);
         drought->setActive(false);
     } else if (season == 2){
         drought->setActive(true);
         rain->setActive(false);
         snow->setActive(false);
+        spring->setActive(false);
     } else {
+        spring->setActive(true);
         drought->setActive(false);
         rain->setActive(false);
         snow->setActive(false);
@@ -120,7 +125,8 @@ void GameWindow::render(float delta)
     rain->update(delta);
     rain->draw(delta);
     drought->update(delta);
-
+    spring->update(delta);
+    spring->draw(delta);
     ++m_frame;
 }
 
