@@ -6,7 +6,9 @@
 #include <QRgb>
 #include <QtGui/QOpenGLFunctions>
 #include <iostream>
+#include <vector>
 
+#include <utils.h>
 #include "pool.cpp"
 
 class SnowFlake {
@@ -28,7 +30,9 @@ public:
     void draw(float delta);
     void reset();
     void setActive(bool active);
-private:
+
+    static GLfloat lightPos[];
+ private:
     int width;
     int height;
     float **snow;

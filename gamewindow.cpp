@@ -97,7 +97,6 @@ void GameWindow::render(float delta)
     glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
     glLightfv(GL_LIGHT0, GL_POSITION, position);
 
-
     drawTriangles();
     if(season == 0) {
         snow->setActive(true);
@@ -171,16 +170,16 @@ void GameWindow::keyPressEvent(QKeyEvent *event)
         camera->scale(-0.10f, -0.10f, 0);
         break;
     case Qt::Key_Up:
-        camera->rotate(1.0f, 0, 0);
+        camera->translate(.01, 0, 0);
         break;
     case Qt::Key_Down:
-        camera->rotate(-1.0f, 0, 0);
+        camera->translate(-.01, 0, 0);
         break;
     case Qt::Key_Left:
-        camera->rotate(0, 0, -1);
+        camera->translate(0, .01, 0);
         break;
     case Qt::Key_Right:
-        camera->rotate(0, 0, 1);
+        camera->translate(0, -.01, 0);
         break;
     case Qt::Key_Space:
         if(fill) {

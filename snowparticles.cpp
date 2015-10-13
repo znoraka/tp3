@@ -1,5 +1,6 @@
 #include "snowparticles.h"
 Pool<SnowFlake *> *SnowFlake::pool = new Pool<SnowFlake*>([] () {return new SnowFlake();});
+GLfloat SnowParticles::lightPos[4] = {1.0, 0.0, -0.4, 1.0};
 
 SnowParticles::SnowParticles(int width, int height, QImage *image)
 {
@@ -16,16 +17,16 @@ SnowParticles::SnowParticles(int width, int height, QImage *image)
     }
     this->image = image;
 
-    //    for (int i = 0; i < 500; ++i) {
-    //        snowFlakes.push_back(createSnowFlake(SnowFlake::pool->obtain()));
-    //    }
+//        for (int i = 0; i < 500; ++i) {
+//            snowFlakes.push_back(createSnowFlake(SnowFlake::pool->obtain()));
+//        }
 
 }
 
 void SnowParticles::update(float delta)
 {
     if(isActive) {
-        if(snowFlakes.size() < 700 && qrand() % 100 < 50) {
+        if(snowFlakes.size() < 700 && qrand() % 100 < 100) {
             snowFlakes.push_back(createSnowFlake(SnowFlake::pool->obtain()));
         }
 
@@ -66,10 +67,18 @@ void SnowParticles::draw(float delta)
     //    glBegin();
     for (int i = 0; i < image->width(); ++i) {
         for (int j = 0; j < image->height(); ++j) {
-            if(snow[i][j] > 0)
+            if(snow[i][j] > 0) {
                 glVertex3f((float) i / (float)image->width() - 0.5f,
                            (float) j / (float)image->height() - 0.5f,
                            qGray(image->pixel(i, j)) * 0.0008f + snow[i][j]);
+//                point p1, p2, p3;
+//                p1.x = i; p1.y = j; p1.z = qGray(image->pixel(i, j));
+//                p2.x = i + 1; p2.y = j; p2.z = qGray(image->pixel(i + 1, j));
+//                p3.x = i; p3.y = j + 1; p3.z = qGray(image->pixel(i, j + 1));
+//                std::vector<float> vec = Utils::getNormal(p1, p3, p2);
+//                glNormal3f(vec[0], vec[1], vec[2]);
+            }
+
         }
     }
     glEnd();

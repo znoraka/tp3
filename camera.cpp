@@ -30,12 +30,20 @@ void Camera::scale(float scaleX, float scaleY, float scaleZ)
     this->ss += scaleX;
 }
 
+void Camera::translate(float x, float y, float z)
+{
+    this->x += x;
+    this->y += y;
+    this->z = z;
+}
+
 void Camera::update(float delta)
 {
     glLoadIdentity();
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -1, 100);
+    glOrtho(-1.0, 1.0, -1.0, 1.0, -10, 100);
 
     glScalef(ss,ss,ss);
+//    glTranslatef(y, x, z);
     glRotatef(rotX,1.0f,0.0f,0.0f);
     glRotatef(rotY, 0.0f, 1.0f, 0.0f);
     glRotatef(rotZ, 0, 0, 1);
@@ -78,6 +86,26 @@ float Camera::getScaleY() const
 bool Camera::isAnimated() const
 {
     return this->animated;
+}
+
+float Camera::getX() const
+{
+    return x;
+}
+
+float Camera::getY() const
+{
+    return y;
+}
+
+void Camera::setCursorCaptured(bool b)
+{
+    this->cursorCaptured = b;
+}
+
+bool Camera::isCursorCaptured() const
+{
+    return this->cursorCaptured;
 }
 
 

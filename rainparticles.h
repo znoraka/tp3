@@ -31,6 +31,8 @@ public:
     void draw(float delta);
     void reset();
     void setActive(bool active);
+
+    static GLfloat lightPos[];
 private:
     int width;
     int height;

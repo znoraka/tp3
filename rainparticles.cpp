@@ -1,5 +1,6 @@
 #include "rainparticles.h"
 Pool<RainDrop *> *RainDrop::pool = new Pool<RainDrop*>([] () {return new RainDrop();});
+GLfloat RainParticles::lightPos[4] = {1.0, 0.0, -0.7, 1.0};
 
 RainParticles::RainParticles(int width, int height, QImage *image)
 {
@@ -88,7 +89,7 @@ void RainParticles::reset()
         RainDrop::pool->release(rainDrops[i]);
     }
     rainDrops.clear();
-//    waterHeight = 0;
+    //    waterHeight = 0;
 }
 
 void RainParticles::setActive(bool active)
