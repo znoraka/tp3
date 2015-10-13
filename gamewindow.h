@@ -10,11 +10,7 @@
 #include "snowparticles.h"
 #include "rainparticles.h"
 #include "drought.h"
-
-struct point
-{
-    float x, y ,z;
-};
+#include "utils.h"
 
 class GameWindow : public OpenGLWindow
 {
@@ -40,6 +36,7 @@ public:
     void displayColor(float);
 
     void loadMap(QString localPath);
+//    static std::vector<float> getNormal(point t1, point t2, point t3);
 
 public slots:
     void onSeasonChange();
@@ -47,7 +44,6 @@ public slots:
 private:
     GLfloat *initVertices(GLint countX, GLint county);
     GLfloat getRandomZ(float x, float y);
-    std::vector<float> getNormal(point t1, point t2, point t3);
     GLuint loadShader(GLenum type, const char *source);
 
     int m_frame;
@@ -79,6 +75,7 @@ private:
     bool fill = false;
     QTimer timer;
 };
+
 
 
 #endif // GAMEWINDOW_H

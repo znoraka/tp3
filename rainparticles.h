@@ -7,8 +7,10 @@
 #include <QtGui/QOpenGLFunctions>
 #include <iostream>
 #include <QtGui/QOpenGLShaderProgram>
+#include <vector>
 
 #include "pool.cpp"
+#include "utils.h"
 
 class RainDrop {
     friend class Pool<RainDrop *>;

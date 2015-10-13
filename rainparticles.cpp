@@ -41,7 +41,7 @@ void RainParticles::draw(float delta)
     if(isActive) {
         glPointSize(1);
         glBegin(GL_LINES);
-        glColor4f(0.2, 0.2, 1, 0.5);
+        glColor4f(0.2, 0.2, 1, 1);
         for (int i = 0; i < rainDrops.size(); ++i) {
             RainDrop *s = rainDrops[i];
             glVertex3f(s->x, s->y, s->z);
@@ -50,18 +50,32 @@ void RainParticles::draw(float delta)
         glEnd();
     }
 
-    if(waterHeight > 0.0001) {
-
-        glColor4f(0.2, 0.2, 1, 0.1);
+    if(waterHeight > 0.000) {
+        glColor4f(0.2, 0.2, 1, 0.5);
         glBegin(GL_QUADS);
         for (int i = -50; i < 50; ++i) {
             for (int j = -50; j < 50; ++j) {
-                //            qDebug() << i * 0.01 << ", " << j * 0.01;
                 float r = 0;
-                glVertex3f(i * 0.01, j * 0.01, waterHeight + sin(i + elapsed + r) * 0.005 + cos(j + elapsed + r) * 0.005);
-                glVertex3f((i + 1) * 0.01, j * 0.01, waterHeight + sin(i + elapsed + r) * 0.005 + cos(j + elapsed + r) * 0.005);
-                glVertex3f((i + 1) * 0.01, (j + 1) * 0.01, waterHeight + sin(i + elapsed + r) * 0.005 + cos(j + elapsed + r) * 0.005);
-                glVertex3f(i * 0.01, (j + 1) * 0.01, waterHeight + sin(i + elapsed + r) * 0.005 + cos(j + elapsed + r) * 0.005);
+                point p1, p2, p3, p4;
+                p1.x = i * 0.01; p1.y = j * 0.01;
+                p1.z = waterHeight + sin(i + elapsed + r) * 0.005 + cos(j + elapsed + r) * 0.005;
+
+                p2.x = (i + 1) * 0.01; p2.y = j * 0.01;
+                p2.z = waterHeight + sin(i + 1 + elapsed + r) * 0.005 + cos(j + elapsed + r) * 0.005;
+
+                p3.x = (i + 1) * 0.01; p3.y = (j + 1) * 0.01;
+                p3.z = waterHeight + sin(i + 1 + elapsed + r) * 0.005 + cos(j + 1+ elapsed + r) * 0.005;
+
+                p4.x = i * 0.01; p4.y = (j + 1) * 0.01;
+                p4.z = waterHeight + sin(i + elapsed + r) * 0.005 + cos(j + 1 + elapsed + r) * 0.005;
+
+                glVertex3f(p1.x, p1.y, p1.z);
+                glVertex3f(p2.x, p2.y, p2.z);
+                glVertex3f(p3.x, p3.y, p3.z);
+                glVertex3f(p4.x, p4.y, p4.z);
+
+                std::vector<float> vec = Utils::getNormal(p1, p3, p2);
+                glNormal3f(vec[0], vec[1], vec[2]);
             }
         }
         glEnd();

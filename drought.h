@@ -12,6 +12,7 @@ public:
     float getSnowHeightModifier() const;
     void setActive(bool active);
 
+
 private:
     float yellow;
     float snowHeight;

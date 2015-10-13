@@ -48,6 +48,8 @@ void GameWindow::initialize()
     glDepthFunc(GL_LESS);
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_CULL_FACE);
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     snow = new SnowParticles(1000, 1000, &this->m_image);
     rain = new RainParticles(0, 0, &this->m_image);
@@ -290,34 +292,19 @@ GLfloat *GameWindow::initVertices(GLint countX, GLint countY)
         p3.x = array[var+6]; p3.y = array[var+7]; p3.z = array[var+8];
         std::vector<float> n;
         if(p1.x == p2.x && p1.y < p2.y) {
-            n = getNormal(p1, p2, p3);
+            n = Utils::getNormal(p1, p2, p3);
         } else if(p1.x != p2.x && p1.y > p2.y) {
-            n = getNormal(p1, p3, p2);
+            n = Utils::getNormal(p1, p3, p2);
         } else if(p1.x == p2.x && p1.y > p2.y){
-            n = getNormal(p1, p3, p2);
+            n = Utils::getNormal(p1, p3, p2);
         } else {
-            n = getNormal(p1, p2, p3);
+            n = Utils::getNormal(p1, p2, p3);
         }
 
         point *p = new point(); p->x = n[0]; p->y = n[1]; p->z = n[2];
         normals.push_back(p);
     }
     return array;
-}
-
-std::vector<float> GameWindow::getNormal(point t1, point t2, point t3)
-{
-    point v, w, n;
-    v.x = t2.x - t1.x; v.y = t2.y - t1.y; v.z = t2.z- t1.z;
-    w.x = t3.x - t1.x; w.y = t3.y - t1.y; w.z = t3.z- t1.z;
-
-    n.x = v.y * w.z - v.z * w.y;
-    n.y = v.z * w.x - v.x * w.z;
-    n.z = v.x * w.y - v.y * w.x;
-    float l = sqrt(pow(n.x, 2)) + sqrt(pow(n.y, 2)) + sqrt(pow(n.z, 2));
-    if(l == 0) l = 1;
-    std::vector<float> res = {n.x / l, n.y / l, n.z / l};
-    return res;
 }
 
 float GameWindow::getRandomZ(float i, float j)

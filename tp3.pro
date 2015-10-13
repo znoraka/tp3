@@ -7,7 +7,8 @@ SOURCES += $$PWD/openglwindow.cpp \
     snowparticles.cpp \
     pool.cpp \
     rainparticles.cpp \
-    drought.cpp
+    drought.cpp \
+    utils.cpp
 HEADERS += $$PWD/openglwindow.h \
     gamewindow.h \
     camera.h \
@@ -16,7 +17,8 @@ HEADERS += $$PWD/openglwindow.h \
     snowparticles.h \
     pool.h \
     rainparticles.h \
-    drought.h
+    drought.h \
+    utils.h
 
 SOURCES += \
     main.cpp
