@@ -259,7 +259,6 @@ GLfloat *GameWindow::initVertices(GLint countX, GLint countY)
     float posY = -0.5f;
 
     int flop = 1;
-
     for (int i = 0; i < countX; ++i) {
         for (int j = 0; j < countY; ++j) {
             array[cpt++] = posX;

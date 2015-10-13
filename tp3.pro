@@ -32,3 +32,6 @@ RESOURCES += \
 QT += network
 QT += widgets
 CONFIG += c++11
+
+QMAKE_CXXFLAGS+= -fopenmp
+QMAKE_LFLAGS +=  -fopenmp

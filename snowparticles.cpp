@@ -29,7 +29,7 @@ void SnowParticles::update(float delta)
         if(snowFlakes.size() < 700 && qrand() % 100 < 100) {
             snowFlakes.push_back(createSnowFlake(SnowFlake::pool->obtain()));
         }
-
+#pragma omp parallel for
         for (int i = 0; i < snowFlakes.size(); ++i) {
             SnowFlake *s = snowFlakes[i];
             s->z -= s->speed * delta;
@@ -42,7 +42,9 @@ void SnowParticles::update(float delta)
             }
         }
     } else {
+#pragma omp parallel for
         for (int i = 0; i < width; ++i) {
+#pragma omp parallel for
             for (int j = 0; j < height; ++j) {
                 if(snow[i][j] > 0 && qrand() % 100 < 2)
                     snow[i][j] -= 0.001;
@@ -65,7 +67,9 @@ void SnowParticles::draw(float delta)
     }
 
     //    glBegin();
+//#pragma omp parallel for
     for (int i = 0; i < image->width(); ++i) {
+//#pragma omp parallel for
         for (int j = 0; j < image->height(); ++j) {
             if(snow[i][j] > 0) {
                 glVertex3f((float) i / (float)image->width() - 0.5f,

@@ -19,6 +19,7 @@ void RainParticles::update(float delta)
             rainDrops.push_back(createRainDrops(RainDrop::pool->obtain()));
         }
 
+#pragma omp parallel for
         for (int i = 0; i < rainDrops.size(); ++i) {
             RainDrop *s = rainDrops[i];
             s->z -= s->speed * delta;
