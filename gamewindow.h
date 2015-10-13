@@ -9,6 +9,7 @@
 #include "serverthread.h"
 #include "snowparticles.h"
 #include "rainparticles.h"
+#include "drought.h"
 
 struct point
 {
@@ -56,11 +57,13 @@ private:
     ClientThread *cthread;
     ServerThread *sthread;
     QCursor* cursor;
+    bool cursorCaptured = false;
     GLfloat* vertices;
+    std::vector<point*> normals;
+
     SnowParticles *snow;
     RainParticles *rain;
-    bool cursorCaptured = false;
-    std::vector<point*> normals;
+    Drought *drought;
 
     int carte=1;
 

@@ -13,10 +13,10 @@ template<typename T>
 T Pool<T>::obtain()
 {
     if(objects.size() == 0) {
-        qDebug() << "created an object of type" << typeid(T).name();
+//        qDebug() << "created an object of type" << typeid(T).name();
         objects.push(f());
     } else {
-        qDebug() << "obtained an object fo type" << typeid(T).name();
+//        qDebug() << "obtained an object fo type" << typeid(T).name();
     }
     return objects.pop();
 }

@@ -6,7 +6,7 @@ RainParticles::RainParticles(int width, int height, QImage *image)
     this->width = image->width();
     this->height = image->height();
     this->image = image;
-    this->waterHeight = 0;
+    this->waterHeight = 0.0;
     this->elapsed = 0;
     this->isActive = false;
 }
@@ -30,7 +30,7 @@ void RainParticles::update(float delta)
             }
         }
     } else {
-        if(waterHeight > 0)
+        if(waterHeight > 0.001)
             waterHeight -= 0.01 * delta;
     }
 }

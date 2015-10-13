@@ -51,6 +51,7 @@ void GameWindow::initialize()
 
     snow = new SnowParticles(1000, 1000, &this->m_image);
     rain = new RainParticles(0, 0, &this->m_image);
+    drought = new Drought();
     this->season = firstSeason++;
 }
 
@@ -97,12 +98,19 @@ void GameWindow::render(float delta)
 
     drawTriangles();
     if(season == 0) {
-        rain->setActive(false);
         snow->setActive(true);
-    } else if (season == 1) {
+        rain->setActive(false);
+        drought->setActive(false);
+    } else if (season == 3) {
         rain->setActive(true);
         snow->setActive(false);
+        drought->setActive(false);
+    } else if (season == 2){
+        drought->setActive(true);
+        rain->setActive(false);
+        snow->setActive(false);
     } else {
+        drought->setActive(false);
         rain->setActive(false);
         snow->setActive(false);
     }
@@ -110,6 +118,7 @@ void GameWindow::render(float delta)
     snow->draw(delta);
     rain->update(delta);
     rain->draw(delta);
+    drought->update(delta);
 
     ++m_frame;
 }
@@ -217,20 +226,6 @@ void GameWindow::keyPressEvent(QKeyEvent *event)
 void GameWindow::drawTriangles()
 {
 
-    GLfloat f[4] = {1, 1, 1, 1};
-    GLfloat f1[4] = {1, 1, 1, 1};
-    GLfloat f2[4] = {1, 1, 1, 1};
-    //    glMaterialf(GL_FRONT, GL_SHININESS, 10.0);
-    //        glMaterialfv(GL_FRONT, GL_DIFFUSE, f);
-    //        glMaterialfv(GL_FRONT, GL_SPECULAR, f);
-    //        glMaterialfv(GL_FRONT, GL_AMBIENT, f);
-    //        glMaterialfv(GL_FRONT, GL_DIFFUSE, f);
-    //        glMaterialfv(GL_FRONT, GL_SPECULAR, f1);
-    //        glMaterialfv(GL_FRONT, GL_AMBIENT, f);
-
-    float greenDiff[4] = {0, 1, 0, 1};
-    float greenSpec[4] = {0, 1, 0, 1};
-    float greenAmb[4] = {0, 1, 0, 1};
     glMaterialf(GL_FRONT, GL_SHININESS, 10.0);
 
     int countX = m_image.width();
@@ -239,8 +234,8 @@ void GameWindow::drawTriangles()
     glBegin(GL_TRIANGLE_STRIP);
     for (int var = 0; var < count - 9; var += 3) {
         if(vertices[var + 2] < 0.08) {
-            glColor3f(vertices[var + 2], 0.4, 0);
-        } else if (vertices[var + 2] > 0.08 && vertices[var + 2] < 0.15) {
+            glColor3f(vertices[var + 2] + drought->getYellow(), 0.4, 0);
+        } else if (vertices[var + 2] > 0.08 && vertices[var + 2] < 0.15 + drought->getSnowHeightModifier()) {
             glColor3f(0.54, 0.27 + vertices[var + 2], 0.07);
         } else {
             glColor3f(0.9, 0.8, 0.9);
