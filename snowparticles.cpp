@@ -55,7 +55,7 @@ void SnowParticles::update(float delta)
 
 void SnowParticles::draw(float delta)
 {
-    glPointSize(3);
+    glPointSize(2);
     glBegin(GL_POINTS);
     glColor3f(0.9, 0.8, 0.9);
     #pragma omp for schedule(dynamic)

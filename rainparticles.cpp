@@ -9,10 +9,18 @@ RainParticles::RainParticles(int width, int height, QImage *image)
     this->waterHeight = 0.0;
     this->elapsed = 0;
     this->isActive = false;
+    this->teta = 0.1;
+    this->phi = 0.1;
+    this->inc = 0.1;
 }
 
 void RainParticles::update(float delta)
 {
+    float f = 0.1;
+
+//    }
+
+    glEnd();
     if(isActive) {
         if(rainDrops.size() < 1000 && qrand() % 100 < 25) {
             rainDrops.push_back(createRainDrops(RainDrop::pool->obtain()));
@@ -52,7 +60,7 @@ void RainParticles::draw(float delta)
         glPointSize(1);
         glBegin(GL_LINES);
         glColor4f(0.2, 0.2, 1, 1);
-        #pragma omp for schedule(dynamic)
+#pragma omp for schedule(dynamic)
         for (int i = 0; i < rainDrops.size(); ++i) {
             RainDrop *s = rainDrops[i];
             glVertex3f(s->x, s->y, s->z);
@@ -79,7 +87,7 @@ void RainParticles::draw(float delta)
     if(waterHeight > 0.000) {
         glColor4f(0.2, 0.2, 1, 0.5);
         glBegin(GL_QUADS);
-        #pragma omp for schedule(dynamic)
+#pragma omp for schedule(dynamic)
         for (int i = -50; i < 50; ++i) {
             for (int j = -50; j < 50; ++j) {
                 float r = 0;

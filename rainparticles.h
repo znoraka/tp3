@@ -43,6 +43,7 @@ private:
     bool isActive;
     float lightningX, lightningY;
     RainDrop *createRainDrops(RainDrop *s);
+    float inc, teta, phi;
 };
 
 #endif // RAINPARTICLES_H
