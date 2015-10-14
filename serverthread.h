@@ -9,6 +9,7 @@
 #include <QNetworkInterface>
 #include <QObject>
 #include <QVector>
+#include <QTimer>
 
 class ServerThread : public QObject
 {
@@ -24,6 +25,7 @@ public slots:
 private:
     QTcpServer server;
     QVector<QTcpSocket*> clients;
+    QTimer timer;
 };
 
 #endif // SERVERTHREAD_H

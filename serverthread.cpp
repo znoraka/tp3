@@ -10,6 +10,8 @@ ServerThread::ServerThread()
     ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
     qDebug() << "address = " << server.serverAddress() << "\nport = " << server.serverPort();
     connect(&server, SIGNAL(newConnection()), this, SLOT(onNewClient()));
+    connect(&timer, SIGNAL(timeout()), this, SLOT(onSeasonChangeRequest()));
+    timer.start(120 * 1000);
 }
 
 void ServerThread::run()
@@ -27,6 +29,7 @@ void ServerThread::onNewClient()
 
 void ServerThread::onSeasonChangeRequest()
 {
+    timer.start(120 * 1000);
     qDebug() << "button pressed";
     QString s = "change season please";
        foreach (QTcpSocket *socket, clients) {

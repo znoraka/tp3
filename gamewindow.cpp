@@ -239,6 +239,7 @@ void GameWindow::drawTriangles()
     int countY = m_image.height();
     int count = countX * countY * 3 * 2 + countX * 3 + 3;
     glBegin(GL_TRIANGLE_STRIP);
+    #pragma omp for schedule(dynamic)
     for (int var = 0; var < count - 9; var += 3) {
         if(vertices[var + 2] < 0.08) {
             glColor3f(vertices[var + 2] + drought->getYellow(), 0.4, 0);
@@ -265,6 +266,7 @@ GLfloat *GameWindow::initVertices(GLint countX, GLint countY)
     float posY = -0.5f;
 
     int flop = 1;
+    #pragma omp for schedule(dynamic)
     for (int i = 0; i < countX; ++i) {
         for (int j = 0; j < countY; ++j) {
             array[cpt++] = posX;
@@ -289,6 +291,7 @@ GLfloat *GameWindow::initVertices(GLint countX, GLint countY)
     array[cpt++] = posX;
     array[cpt++] = posY;
     array[cpt++] = getRandomZ(posX, posY);
+    #pragma omp for schedule(dynamic)
     for (int var = 0; var < cpt - 9; var += 3) {
         point p1, p2, p3;
         p1.x = array[var+0]; p1.y = array[var+1]; p1.z = array[var+2];

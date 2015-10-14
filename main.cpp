@@ -76,9 +76,9 @@ int main(int argc, char **argv)
     g = createWindow(c, 1.0f / 60.0f);
     g->setPosition(600, 10);
     g = createWindow(c, 1.0f / 60.0f);
-    g->setPosition(120, 400);
-    g = createWindow(c, 1.0f / 60.0f);
     g->setPosition(600, 400);
+    g = createWindow(c, 1.0f / 60.0f);
+    g->setPosition(120, 400);
 
     return app.exec();
 }

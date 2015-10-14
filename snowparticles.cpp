@@ -58,6 +58,7 @@ void SnowParticles::draw(float delta)
     glPointSize(3);
     glBegin(GL_POINTS);
     glColor3f(0.9, 0.8, 0.9);
+    #pragma omp for schedule(dynamic)
     for (int i = 0; i < snowFlakes.size(); ++i) {
         SnowFlake *s = snowFlakes[i];
         //        int x = s->x * this->image->width();
@@ -66,9 +67,8 @@ void SnowParticles::draw(float delta)
     }
 
     //    glBegin();
-//#pragma omp parallel for
+#pragma omp for schedule(dynamic)
     for (int i = 0; i < image->width(); ++i) {
-//#pragma omp parallel for
         for (int j = 0; j < image->height(); ++j) {
             if(snow[i][j] > 0) {
                 glVertex3f((float) i / (float)image->width() - 0.5f,
@@ -89,6 +89,7 @@ void SnowParticles::draw(float delta)
 
 void SnowParticles::reset()
 {
+    #pragma omp for schedule(dynamic)
     for (int i = 0; i < snowFlakes.size(); ++i) {
         SnowFlake::pool->release(snowFlakes[i]);
     }

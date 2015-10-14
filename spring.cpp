@@ -16,6 +16,7 @@ void Spring::update(float delta)
     this->windY = 0;
     if(isActive) {
         if(grass.size() < 700 && qrand() % 100 < 20) {
+            #pragma omp for schedule(dynamic)
             for (int i = 0; i < 2; ++i) {
                 float x = qrand() % this->image->width();
                 float y = qrand() % this->image->height();
@@ -50,6 +51,7 @@ void Spring::update(float delta)
 
 void Spring::draw(float delta)
 {
+    #pragma omp for schedule(dynamic)
     for (int i = 0; i < grass.size(); ++i) {
         glColor3f(0.01, 0.6, 0.0);
         glBegin(GL_LINES);

@@ -27,7 +27,7 @@ void RainParticles::update(float delta)
             float value = qGray(image->pixel(x, y)) * 0.0008f;
             if(value > s->z) {
                 createRainDrops(s);
-                waterHeight += 0.0000005f;
+                if(waterHeight < 0.1) waterHeight += 0.0002f * delta;
             }
         }
     } else {
@@ -52,6 +52,7 @@ void RainParticles::draw(float delta)
         glPointSize(1);
         glBegin(GL_LINES);
         glColor4f(0.2, 0.2, 1, 1);
+        #pragma omp for schedule(dynamic)
         for (int i = 0; i < rainDrops.size(); ++i) {
             RainDrop *s = rainDrops[i];
             glVertex3f(s->x, s->y, s->z);
@@ -78,6 +79,7 @@ void RainParticles::draw(float delta)
     if(waterHeight > 0.000) {
         glColor4f(0.2, 0.2, 1, 0.5);
         glBegin(GL_QUADS);
+        #pragma omp for schedule(dynamic)
         for (int i = -50; i < 50; ++i) {
             for (int j = -50; j < 50; ++j) {
                 float r = 0;

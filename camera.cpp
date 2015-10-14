@@ -14,8 +14,8 @@ void Camera::initialize(qreal ratio, qreal width, qreal height, qreal near, qrea
     glOrtho(-1.0, 1.0, -1.0, 1.0, -1, 100);
     this->rotX = 300;
     this->rotY = 0;
-    this->rotZ = 0;
-    this->ss = 1;
+    this->rotZ = 40;
+    this->ss = 2;
 }
 
 void Camera::rotate(float x, float y, float z)
@@ -49,7 +49,7 @@ void Camera::update(float delta)
     glRotatef(rotZ, 0, 0, 1);
 
     if(this->animated) {
-        this->rotate(0, 0, 1);
+        this->rotate(0, 0, 0.3);
     }
 }
 
