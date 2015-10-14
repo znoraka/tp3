@@ -1,8 +1,8 @@
 * Les controles :
-** controles de base pour tout ce qui est zoom/dezoom
-** rotation de la camera à la souris, il faut cliquer sur une fenêtre pour capturer le curseur
-** echap permet de libérer le curseur
-** tab quitte toutes les fenêtres
+ * controles de base pour tout ce qui est zoom/dezoom
+ * rotation de la camera à la souris, il faut cliquer sur une fenêtre pour capturer le curseur
+ * echap permet de libérer le curseur
+ * tab quitte toutes les fenêtres
 
 * L'alternance entre les saisons se fait toutes les 120 secondes, un bouton dans une fenêtre supplémentaire (qui sert de serveur) permet également de changer la saison.
 
