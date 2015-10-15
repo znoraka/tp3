@@ -71,6 +71,12 @@ void GameWindow::onSeasonChange()
 
 void GameWindow::render()
 {
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_CULL_FACE);
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     this->render((float) timer.interval() * 0.001f);
 }
 
@@ -82,7 +88,7 @@ void GameWindow::render(float delta)
     }
     this->camera->update(delta);
 
-    //    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Active la correction de perspective (pour ombrage, texture, ...)
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Active la correction de perspective (pour ombrage, texture, ...)
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -249,8 +255,8 @@ void GameWindow::drawTriangles()
         } else {
             glColor3f(0.9, 0.8, 0.9);
         }
-        glNormal3f(normals[var / 3]->x, normals[var / 3]->y, normals[var / 3]->z);
         glVertex3f(vertices[var], vertices[var + 1], vertices[var + 2]);
+        glNormal3f(normals[var / 3]->x, normals[var / 3]->y, normals[var / 3]->z);
     }
     glEnd();
 }

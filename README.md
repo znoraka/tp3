@@ -7,16 +7,20 @@
 * L'alternance entre les saisons se fait toutes les 120 secondes, un bouton dans une fenêtre supplémentaire (qui sert de serveur) permet également de changer la saison.
 
 * Il neige en hiver, la neige reste là où elle est tombée, c'est géré avec une matrice de la taille de la heightmap, et à chaque case de cette matrice correspond une hauteur de neige.
+![alt tag](./winter.png)
 
 * Au printemps des fleurs poussent.
+![alt tag](./spring.png)
 
 * En été le sol jaunit et la neige des sommets disparait.
+![alt tag](./summer.png)
 
 * En automne il pleut, lorsqu'une goutte de pluie touche le sol, le niveau de l'eau monte, il y a également régulièrement des eclairs.
+![alt tag](./autumn.png)
 
 * Lors d'un changement de saison, l'ancienne saison ne disparait pas directement, la neige fond au fur et à mesure, le niveau de l'eau baisse, l'herbe redevient verte et les fleurs fannent.
 
-* Toutes les scènes sont éclairées, cela permet d'avoir un rendu réaliste, de bien voire les reliefs et d'avoir une eau cohérente.
+* Toutes les scènes sont eclairées, cela permet d'avoir un rendu réaliste, de bien voire les reliefs et d'avoir une eau cohérente.
 
 * Les gouttes d'eau, les fleurs et les flocons de neige sont gérés par un système de pool, dans laquelle on pioche et on remet les éléments à la fin de leur utilisation.
 

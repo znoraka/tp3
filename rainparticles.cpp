@@ -18,9 +18,15 @@ void RainParticles::update(float delta)
 {
     float f = 0.1;
 
-//    }
+    if(qrand() % 1000 < 100) {
+        lightningX = ((qrand() % 100) - 50) * 0.01;
+        lightningY = ((qrand() % 100) - 50) * 0.01;
+    }
+    if(qrand() % 1000 > 700) {
+        lightningX = -2;
+        lightningY = -2;
+    }
 
-    glEnd();
     if(isActive) {
         if(rainDrops.size() < 1000 && qrand() % 100 < 25) {
             rainDrops.push_back(createRainDrops(RainDrop::pool->obtain()));
@@ -46,14 +52,6 @@ void RainParticles::update(float delta)
 
 void RainParticles::draw(float delta)
 {
-    if(qrand() % 1000 < 100) {
-        lightningX = ((qrand() % 100) - 50) * 0.01;
-        lightningY = ((qrand() % 100) - 50) * 0.01;
-    }
-    if(qrand() % 1000 > 700) {
-        lightningX = -2;
-        lightningY = -2;
-    }
 
     elapsed += delta * 10;
     if(isActive) {
@@ -104,10 +102,15 @@ void RainParticles::draw(float delta)
                 p4.x = i * 0.01; p4.y = (j + 1) * 0.01;
                 p4.z = waterHeight + sin(i + elapsed + r) * 0.005 + cos(j + 1 + elapsed + r) * 0.005;
 
-                glVertex3f(p1.x, p1.y, p1.z);
-                glVertex3f(p2.x, p2.y, p2.z);
-                glVertex3f(p3.x, p3.y, p3.z);
-                glVertex3f(p4.x, p4.y, p4.z);
+                float z = qGray(image->pixel((i + 50) * 240 * 0.01, (j + 50) * 240 * 0.01));
+                z *= 0.0008;
+//                qDebug() << (i + 50) * 240 * 0.01;
+                if(p1.z > z || p2.z > z || p3.z > z) {
+                    glVertex3f(p1.x, p1.y, p1.z);
+                    glVertex3f(p2.x, p2.y, p2.z);
+                    glVertex3f(p3.x, p3.y, p3.z);
+                    glVertex3f(p4.x, p4.y, p4.z);
+                }
 
                 std::vector<float> vec = Utils::getNormal(p1, p3, p2);
                 glNormal3f(vec[0], vec[1], vec[2]);
