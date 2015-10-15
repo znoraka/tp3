@@ -53,7 +53,7 @@ GameWindow *createWindow(Camera* camera, float framerate) {
 
     GameWindow *w = new GameWindow(camera, framerate);
     w->setFormat(format);
-    w->resize(1366, 1024);
+    w->resize(640, 480);
     w->show();
     w->setAnimating(true);
     return w;
@@ -68,17 +68,17 @@ int main(int argc, char **argv)
     ControllerWindow window;
     window.show();
     window.resize(200, 120);
-    window.move(1100, 400);
+    window.move(1350, 400);
 
     Camera *c = new Camera();
     GameWindow *g = createWindow(c, 1.0f / 60.0f);
     g->setPosition(120, 10);
     g = createWindow(c, 1.0f / 60.0f);
-    g->setPosition(600, 10);
+    g->setPosition(760, 10);
     g = createWindow(c, 1.0f / 60.0f);
-    g->setPosition(600, 400);
+    g->setPosition(760, 490);
     g = createWindow(c, 1.0f / 60.0f);
-    g->setPosition(120, 400);
+    g->setPosition(120, 490);
 
     return app.exec();
 }

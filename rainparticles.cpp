@@ -27,24 +27,32 @@ void RainParticles::update(float delta)
         lightningY = -2;
     }
 
+#pragma omp parallel for
+    for (int i = 0; i < rainDrops.size(); ++i) {
+        RainDrop *s = rainDrops[i];
+        s->z -= s->speed * delta;
+        int x = s->x * image->width() + image->width() * 0.5;
+        int y = s->y * image->width() + image->width() * 0.5;
+        float value = qGray(image->pixel(x, y)) * 0.0008f;
+        if(value > s->z) {
+            createRainDrops(s);
+            if(waterHeight < 0.1) waterHeight += 0.0002f * delta;
+        }
+    }
+
     if(isActive) {
         if(rainDrops.size() < 1000 && qrand() % 100 < 25) {
             rainDrops.push_back(createRainDrops(RainDrop::pool->obtain()));
         }
-
-#pragma omp parallel for
-        for (int i = 0; i < rainDrops.size(); ++i) {
-            RainDrop *s = rainDrops[i];
-            s->z -= s->speed * delta;
-            int x = s->x * image->width() + image->width() * 0.5;
-            int y = s->y * image->width() + image->width() * 0.5;
-            float value = qGray(image->pixel(x, y)) * 0.0008f;
-            if(value > s->z) {
-                createRainDrops(s);
-                if(waterHeight < 0.1) waterHeight += 0.0002f * delta;
+    } else {
+#pragma omp for schedule(dynamic)
+        for (int i = 0; i < 3; ++i) {
+            if(rainDrops.begin() != rainDrops.end()) {
+                RainDrop *r = rainDrops[0];
+                RainDrop::pool->release(r);
+                rainDrops.erase(rainDrops.begin());
             }
         }
-    } else {
         if(waterHeight > 0.001)
             waterHeight -= 0.01 * delta;
     }
@@ -54,18 +62,18 @@ void RainParticles::draw(float delta)
 {
 
     elapsed += delta * 10;
-    if(isActive) {
-        glPointSize(1);
-        glBegin(GL_LINES);
-        glColor4f(0.2, 0.2, 1, 1);
+    glPointSize(1);
+    glBegin(GL_LINES);
+    glColor4f(0.2, 0.2, 1, 1);
 #pragma omp for schedule(dynamic)
-        for (int i = 0; i < rainDrops.size(); ++i) {
-            RainDrop *s = rainDrops[i];
-            glVertex3f(s->x, s->y, s->z);
-            glVertex3f(s->x, s->y, s->z + 0.01);
-        }
-        glEnd();
+    for (int i = 0; i < rainDrops.size(); ++i) {
+        RainDrop *s = rainDrops[i];
+        glVertex3f(s->x, s->y, s->z);
+        glVertex3f(s->x, s->y, s->z + 0.01);
+    }
+    glEnd();
 
+    if(isActive) {
         if(lightningX > -2) {
             glColor3f(1, 1, 1);
             glBegin(GL_LINE_STRIP);
@@ -104,7 +112,7 @@ void RainParticles::draw(float delta)
 
                 float z = qGray(image->pixel((i + 50) * 240 * 0.01, (j + 50) * 240 * 0.01));
                 z *= 0.0008;
-//                qDebug() << (i + 50) * 240 * 0.01;
+                //                qDebug() << (i + 50) * 240 * 0.01;
                 if(p1.z > z || p2.z > z || p3.z > z) {
                     glVertex3f(p1.x, p1.y, p1.z);
                     glVertex3f(p2.x, p2.y, p2.z);
@@ -122,10 +130,10 @@ void RainParticles::draw(float delta)
 
 void RainParticles::reset()
 {
-    for (int i = 0; i < rainDrops.size(); ++i) {
-        RainDrop::pool->release(rainDrops[i]);
-    }
-    rainDrops.clear();
+    //    for (int i = 0; i < rainDrops.size(); ++i) {
+    //        RainDrop::pool->release(rainDrops[i]);
+    //    }
+    //    rainDrops.clear();
     //    waterHeight = 0;
 }
 

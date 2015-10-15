@@ -44,7 +44,10 @@ void GameWindow::initialize()
     this->vertices = initVertices(this->m_image.width(), this->m_image.height());
 
     this->cursor = new QCursor(Qt::BlankCursor);
-    this->setCursor(*cursor);
+    this->cursor2 = new QCursor(Qt::ArrowCursor);
+
+//    this->setCursor(*cursor2);
+
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_COLOR_MATERIAL);
@@ -57,6 +60,7 @@ void GameWindow::initialize()
     drought = new Drought();
     spring = new Spring(&this->m_image);
     this->season = firstSeason++;
+    this->onSeasonChange();
 }
 
 void GameWindow::onSeasonChange()
@@ -65,7 +69,28 @@ void GameWindow::onSeasonChange()
     snow->reset();
     rain->reset();
     if(++season >= 4) season = 0;
-    qDebug() << season;
+
+    if(season == 0) {
+        snow->setActive(true);
+        rain->setActive(false);
+        spring->setActive(false);
+        drought->setActive(false);
+    } else if (season == 3) {
+        rain->setActive(true);
+        snow->setActive(false);
+        spring->setActive(false);
+        drought->setActive(false);
+    } else if (season == 2){
+        drought->setActive(true);
+        rain->setActive(false);
+        snow->setActive(false);
+        spring->setActive(false);
+    } else {
+        spring->setActive(true);
+        drought->setActive(false);
+        rain->setActive(false);
+        snow->setActive(false);
+    }
 
 }
 
@@ -106,27 +131,7 @@ void GameWindow::render(float delta)
     glLightfv(GL_LIGHT0, GL_POSITION, position);
 
     drawTriangles();
-    if(season == 0) {
-        snow->setActive(true);
-        rain->setActive(false);
-        spring->setActive(false);
-        drought->setActive(false);
-    } else if (season == 3) {
-        rain->setActive(true);
-        snow->setActive(false);
-        spring->setActive(false);
-        drought->setActive(false);
-    } else if (season == 2){
-        drought->setActive(true);
-        rain->setActive(false);
-        snow->setActive(false);
-        spring->setActive(false);
-    } else {
-        spring->setActive(true);
-        drought->setActive(false);
-        rain->setActive(false);
-        snow->setActive(false);
-    }
+
     snow->update(delta);
     snow->draw(delta);
     rain->update(delta);
@@ -154,6 +159,7 @@ bool GameWindow::event(QEvent *event)
         }
         return true;
     case QEvent::MouseButtonPress:
+        this->setCursor(*cursor);
         cursorCaptured = true;
         return true;
     case QEvent::UpdateRequest:
@@ -171,6 +177,7 @@ void GameWindow::keyPressEvent(QKeyEvent *event)
     {
     case Qt::Key_Escape:
         cursorCaptured = false;
+        this->setCursor(*cursor2);
         //        qApp->exit();
         break;
     case Qt::Key_Tab:
@@ -178,21 +185,6 @@ void GameWindow::keyPressEvent(QKeyEvent *event)
         break;
     case 'Z':
         camera->scale(0.10f, 0.10f, 0);
-        break;
-    case 'S':
-        camera->scale(-0.10f, -0.10f, 0);
-        break;
-    case Qt::Key_Up:
-        camera->translate(.01, 0, 0);
-        break;
-    case Qt::Key_Down:
-        camera->translate(-.01, 0, 0);
-        break;
-    case Qt::Key_Left:
-        camera->translate(0, .01, 0);
-        break;
-    case Qt::Key_Right:
-        camera->translate(0, -.01, 0);
         break;
     case Qt::Key_Space:
         if(fill) {
@@ -209,29 +201,6 @@ void GameWindow::keyPressEvent(QKeyEvent *event)
         break;
     case 'C':
         this->camera->setAnimated(!this->camera->isAnimated());
-        break;
-    case 'P':
-        qDebug() << framerate;
-
-        this->framerate *= 2;
-        timer.stop();
-        timer.start(framerate * 1000);
-        break;
-    case 'M':
-        this->framerate /= 2;
-        if(this->framerate < 0.001) this->framerate = 0.001;
-        timer.stop();
-        timer.start(framerate * 1000);
-        break;
-    case 'X':
-        carte ++;
-        if(carte > 3)
-            carte = 1;
-        QString depth (":/heightmap-");
-        depth += QString::number(carte) ;
-        depth += ".png" ;
-
-        //        loadMap(depth);
         break;
     }
     renderNow();

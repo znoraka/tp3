@@ -54,6 +54,7 @@ private:
     ClientThread *cthread;
     ServerThread *sthread;
     QCursor* cursor;
+    QCursor* cursor2;
     bool cursorCaptured = false;
     GLfloat* vertices;
     std::vector<point*> normals;

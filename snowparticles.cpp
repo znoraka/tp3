@@ -16,31 +16,39 @@ SnowParticles::SnowParticles(int width, int height, QImage *image)
     }
     this->image = image;
 
-//        for (int i = 0; i < 500; ++i) {
-//            snowFlakes.push_back(createSnowFlake(SnowFlake::pool->obtain()));
-//        }
+    //        for (int i = 0; i < 500; ++i) {
+    //            snowFlakes.push_back(createSnowFlake(SnowFlake::pool->obtain()));
+    //        }
 
 }
 
 void SnowParticles::update(float delta)
 {
+#pragma omp parallel for
+    for (int i = 0; i < snowFlakes.size(); ++i) {
+        SnowFlake *s = snowFlakes[i];
+        s->z -= s->speed * delta;
+        int x = s->x * image->width() + image->width() * 0.5;
+        int y = s->y * image->width() + image->width() * 0.5;
+        float value = qGray(image->pixel(x, y)) * 0.0008f;
+        if(value > s->z) {
+            snow[x][y] += 0.001;
+            createSnowFlake(s);
+        }
+    }
     if(isActive) {
         if(snowFlakes.size() < 700 && qrand() % 100 < 50) {
             snowFlakes.push_back(createSnowFlake(SnowFlake::pool->obtain()));
         }
-#pragma omp parallel for
-        for (int i = 0; i < snowFlakes.size(); ++i) {
-            SnowFlake *s = snowFlakes[i];
-            s->z -= s->speed * delta;
-            int x = s->x * image->width() + image->width() * 0.5;
-            int y = s->y * image->width() + image->width() * 0.5;
-            float value = qGray(image->pixel(x, y)) * 0.0008f;
-            if(value > s->z) {
-                snow[x][y] += 0.001;
-                createSnowFlake(s);
+    } else {
+#pragma omp for schedule(dynamic)
+        for (int i = 0; i < 5; ++i) {
+            if(snowFlakes.begin() != snowFlakes.end()) {
+                SnowFlake *r = snowFlakes[0];
+                SnowFlake::pool->release(r);
+                snowFlakes.erase(snowFlakes.begin());
             }
         }
-    } else {
 #pragma omp parallel for
         for (int i = 0; i < width; ++i) {
 #pragma omp parallel for
@@ -58,7 +66,7 @@ void SnowParticles::draw(float delta)
     glPointSize(3);
     glBegin(GL_POINTS);
     glColor3f(0.9, 0.8, 0.9);
-    #pragma omp for schedule(dynamic)
+#pragma omp for schedule(dynamic)
     for (int i = 0; i < snowFlakes.size(); ++i) {
         SnowFlake *s = snowFlakes[i];
         //        int x = s->x * this->image->width();
@@ -74,12 +82,12 @@ void SnowParticles::draw(float delta)
                 glVertex3f((float) i / (float)image->width() - 0.5f,
                            (float) j / (float)image->height() - 0.5f,
                            qGray(image->pixel(i, j)) * 0.0008f + snow[i][j]);
-//                point p1, p2, p3;
-//                p1.x = i; p1.y = j; p1.z = qGray(image->pixel(i, j));
-//                p2.x = i + 1; p2.y = j; p2.z = qGray(image->pixel(i + 1, j));
-//                p3.x = i; p3.y = j + 1; p3.z = qGray(image->pixel(i, j + 1));
-//                std::vector<float> vec = Utils::getNormal(p1, p3, p2);
-//                glNormal3f(vec[0], vec[1], vec[2]);
+                //                point p1, p2, p3;
+                //                p1.x = i; p1.y = j; p1.z = qGray(image->pixel(i, j));
+                //                p2.x = i + 1; p2.y = j; p2.z = qGray(image->pixel(i + 1, j));
+                //                p3.x = i; p3.y = j + 1; p3.z = qGray(image->pixel(i, j + 1));
+                //                std::vector<float> vec = Utils::getNormal(p1, p3, p2);
+                //                glNormal3f(vec[0], vec[1], vec[2]);
             }
 
         }
@@ -89,11 +97,11 @@ void SnowParticles::draw(float delta)
 
 void SnowParticles::reset()
 {
-    #pragma omp for schedule(dynamic)
-    for (int i = 0; i < snowFlakes.size(); ++i) {
-        SnowFlake::pool->release(snowFlakes[i]);
-    }
-    snowFlakes.clear();
+    //#pragma omp for schedule(dynamic)
+    //    for (int i = 0; i < snowFlakes.size(); ++i) {
+    //        SnowFlake::pool->release(snowFlakes[i]);
+    //    }
+    //    snowFlakes.clear();
 }
 
 void SnowParticles::setActive(bool active)
