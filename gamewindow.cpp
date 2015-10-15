@@ -38,7 +38,8 @@ void GameWindow::initialize()
     timer.start();
     this->connect(&timer, SIGNAL(timeout()), this, SLOT(renderNow()));
 
-    this->m_image = QImage("/home/noe/Documents/dev/imagina-gmin317-2015/tp1/heightmap-1.png");
+    this->m_image = QImage(":/heightmap-1.png");
+    qDebug() << this->m_image.width();
 
     this->vertices = initVertices(this->m_image.width(), this->m_image.height());
 
